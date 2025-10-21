@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Retro space shooter game - Experience classic arcade gaming in your browser">
+    <meta name="keywords" content="space shooter, retro game, arcade, HTML5 game">
+    <meta name="author" content="Hugo Rollan">
     <title>Space Shooter Retro</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -12,11 +15,16 @@
         <div class="title-container">
             <h1 class="retro-title">SPACE SHOOTER</h1>
             <p class="subtitle">Año 1990</p>
+            <div class="high-score-display">
+                <p>RÉCORD: <span id="startHighScore">0</span></p>
+            </div>
         </div>
         <button id="startButton" class="retro-button">EMPEZAR A JUGAR</button>
+        <button id="musicToggle" class="retro-button secondary">🔊 MÚSICA: ON</button>
         <div class="controls-info">
             <p>CONTROLES:</p>
-            <p>← → MOVER | ESPACIO DISPARAR | P PAUSA</p>
+            <p>← → MOVER | ESPACIO DISPARAR</p>
+            <p>P PAUSA | M MÚSICA</p>
         </div>
     </div>
 
@@ -26,6 +34,7 @@
             <div class="hud-item">VIDAS: <span id="lives">3</span></div>
             <div class="hud-item">NIVEL: <span id="level">1</span></div>
             <div class="hud-item">PUNTOS: <span id="score">0</span></div>
+            <div class="hud-item">RÉCORD: <span id="highScore">0</span></div>
         </div>
         <canvas id="gameCanvas"></canvas>
     </div>
@@ -35,6 +44,7 @@
         <div class="menu-box">
             <h2 class="retro-title">PAUSA</h2>
             <p>Presiona P para continuar</p>
+            <p>Presiona M para música</p>
         </div>
     </div>
 
@@ -46,6 +56,7 @@
             <div class="final-score">
                 <p>PUNTUACIÓN FINAL:</p>
                 <p class="score-value" id="finalScore">0</p>
+                <p class="high-score-label">RÉCORD: <span id="victoryHighScore">0</span></p>
             </div>
             <button id="restartButton" class="retro-button">JUGAR DE NUEVO</button>
         </div>
@@ -58,6 +69,7 @@
             <div class="final-score">
                 <p>PUNTUACIÓN:</p>
                 <p class="score-value" id="gameOverScore">0</p>
+                <p class="high-score-label">RÉCORD: <span id="gameOverHighScore">0</span></p>
             </div>
             <button id="retryButton" class="retro-button">INTENTAR DE NUEVO</button>
         </div>

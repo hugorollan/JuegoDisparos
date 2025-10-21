@@ -1,4 +1,7 @@
-// Game configuration
+/**
+ * Game configuration constants
+ * @constant {Object}
+ */
 const CONFIG = {
     WIDTH: 800,
     HEIGHT: 600,
@@ -10,15 +13,20 @@ const CONFIG = {
     ENEMY_BULLET_SIZE: 5,
     BASE_ENEMY_SPEED: 2,
     BASE_ENEMY_SHOOT_INTERVAL: 2000,
-    BOSS_LEVEL: 5
+    BOSS_LEVEL: 5,
+    HIGH_SCORE_KEY: 'spaceShooterHighScore'
 };
 
-// Game state
+/**
+ * Game state management
+ * @type {Object}
+ */
 let gameState = {
     isRunning: false,
     isPaused: false,
     level: 1,
     score: 0,
+    highScore: 0,
     lives: 3,
     player: null,
     bullets: [],
@@ -28,10 +36,14 @@ let gameState = {
     canvas: null,
     ctx: null,
     lastEnemyShot: 0,
-    audio: null
+    audio: null,
+    isMusicEnabled: true
 };
 
-// Audio context for retro music
+/**
+ * Audio system for retro music and sound effects
+ * @class AudioSystem
+ */
 class AudioSystem {
     constructor() {
         this.audioContext = null;
@@ -40,16 +52,31 @@ class AudioSystem {
         this.isMusicPlaying = false;
     }
 
+    /**
+     * Initialize audio context
+     * @returns {boolean} Success status
+     */
     init() {
-        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        this.masterGain = this.audioContext.createGain();
-        this.masterGain.gain.value = 0.3;
-        this.masterGain.connect(this.audioContext.destination);
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.masterGain = this.audioContext.createGain();
+            this.masterGain.gain.value = 0.3;
+            this.masterGain.connect(this.audioContext.destination);
+            return true;
+        } catch (error) {
+            console.error('Failed to initialize audio:', error);
+            return false;
+        }
     }
 
+    /**
+     * Play retro background music
+     */
     playRetroMusic() {
-        if (this.isMusicPlaying) return;
-        if (!this.audioContext) this.init();
+        if (this.isMusicPlaying || !gameState.isMusicEnabled) return;
+        if (!this.audioContext) {
+            if (!this.init()) return;
+        }
         
         this.isMusicPlaying = true;
         
@@ -93,55 +120,84 @@ class AudioSystem {
         playMelody(this.audioContext.currentTime);
     }
 
+    /**
+     * Stop background music
+     */
     stopMusic() {
         this.isMusicPlaying = false;
     }
 
+    /**
+     * Play shooting sound effect
+     */
     playShootSound() {
-        if (!this.audioContext) this.init();
-        
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        
-        oscillator.type = 'square';
-        oscillator.frequency.value = 200;
-        
-        gainNode.gain.value = 0.3;
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
-        
-        oscillator.connect(gainNode);
-        gainNode.connect(this.masterGain);
-        
-        oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + 0.1);
-    }
-
-    playExplosionSound() {
-        if (!this.audioContext) this.init();
-        
-        const noise = this.audioContext.createBufferSource();
-        const buffer = this.audioContext.createBuffer(1, this.audioContext.sampleRate * 0.5, this.audioContext.sampleRate);
-        const data = buffer.getChannelData(0);
-        
-        for (let i = 0; i < buffer.length; i++) {
-            data[i] = Math.random() * 2 - 1;
+        if (!this.audioContext) {
+            if (!this.init()) return;
         }
         
-        noise.buffer = buffer;
+        try {
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.type = 'square';
+            oscillator.frequency.value = 200;
+            
+            gainNode.gain.value = 0.3;
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.masterGain);
+            
+            oscillator.start(this.audioContext.currentTime);
+            oscillator.stop(this.audioContext.currentTime + 0.1);
+        } catch (error) {
+            console.error('Failed to play shoot sound:', error);
+        }
+    }
+
+    /**
+     * Play explosion sound effect
+     */
+    playExplosionSound() {
+        if (!this.audioContext) {
+            if (!this.init()) return;
+        }
         
-        const gainNode = this.audioContext.createGain();
-        gainNode.gain.value = 0.3;
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
-        
-        noise.connect(gainNode);
-        gainNode.connect(this.masterGain);
-        
-        noise.start(this.audioContext.currentTime);
+        try {
+            const noise = this.audioContext.createBufferSource();
+            const buffer = this.audioContext.createBuffer(1, this.audioContext.sampleRate * 0.5, this.audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < buffer.length; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            
+            noise.buffer = buffer;
+            
+            const gainNode = this.audioContext.createGain();
+            gainNode.gain.value = 0.3;
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+            
+            noise.connect(gainNode);
+            gainNode.connect(this.masterGain);
+            
+            noise.start(this.audioContext.currentTime);
+        } catch (error) {
+            console.error('Failed to play explosion sound:', error);
+        }
     }
 }
 
-// Player class
+/**
+ * Player class - represents the player's spaceship
+ * @class Player
+ */
 class Player {
+    /**
+     * Create a player
+     * @param {number} x - Initial x coordinate
+     * @param {number} y - Initial y coordinate
+     */
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -150,6 +206,9 @@ class Player {
         this.speed = CONFIG.PLAYER_SPEED;
     }
 
+    /**
+     * Update player position based on keyboard input
+     */
     update() {
         if (gameState.keys['ArrowLeft'] && this.x > 0) {
             this.x -= this.speed;
@@ -159,6 +218,10 @@ class Player {
         }
     }
 
+    /**
+     * Draw the player spaceship on canvas
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
+     */
     draw(ctx) {
         // Draw retro spaceship
         ctx.fillStyle = '#0ff';
@@ -180,14 +243,24 @@ class Player {
         ctx.fillRect(this.x + this.width / 2 - 5, this.y + 10, 10, 10);
     }
 
+    /**
+     * Shoot a bullet from player position
+     */
     shoot() {
         gameState.bullets.push(new Bullet(this.x + this.width / 2 - CONFIG.BULLET_SIZE / 2, this.y, -1));
         gameState.audio.playShootSound();
     }
 }
 
-// Enemy class
+/**
+ * Enemy class - represents enemy spaceships
+ * @class Enemy
+ */
 class Enemy {
+    /**
+     * Create an enemy
+     * @param {number} level - Current game level
+     */
     constructor(level) {
         this.width = CONFIG.ENEMY_SIZE;
         this.height = CONFIG.ENEMY_SIZE;
@@ -208,6 +281,9 @@ class Enemy {
         }
     }
 
+    /**
+     * Update enemy position
+     */
     update() {
         this.x += this.speed * this.direction;
         
@@ -216,6 +292,10 @@ class Enemy {
         }
     }
 
+    /**
+     * Draw enemy on canvas
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
+     */
     draw(ctx) {
         // Draw enemy ship
         if (this.isBoss) {
@@ -249,19 +329,35 @@ class Enemy {
         ctx.fillRect(this.x, this.y - 15, healthBarWidth * healthPercent, healthBarHeight);
     }
 
+    /**
+     * Enemy shoots a bullet
+     */
     shoot() {
         const bulletX = this.x + this.width / 2 - CONFIG.ENEMY_BULLET_SIZE / 2;
         gameState.enemyBullets.push(new Bullet(bulletX, this.y + this.height, 1));
     }
 
+    /**
+     * Apply damage to enemy
+     * @returns {boolean} True if enemy is destroyed
+     */
     takeDamage() {
         this.health--;
         return this.health <= 0;
     }
 }
 
-// Bullet class
+/**
+ * Bullet class - represents projectiles
+ * @class Bullet
+ */
 class Bullet {
+    /**
+     * Create a bullet
+     * @param {number} x - Initial x coordinate
+     * @param {number} y - Initial y coordinate
+     * @param {number} direction - Direction of movement (-1 for up, 1 for down)
+     */
     constructor(x, y, direction) {
         this.x = x;
         this.y = y;
@@ -271,10 +367,17 @@ class Bullet {
         this.direction = direction; // -1 for up, 1 for down
     }
 
+    /**
+     * Update bullet position
+     */
     update() {
         this.y += this.speed * this.direction;
     }
 
+    /**
+     * Draw bullet on canvas
+     * @param {CanvasRenderingContext2D} ctx - Canvas rendering context
+     */
     draw(ctx) {
         if (this.direction === -1) {
             ctx.fillStyle = '#0ff';
@@ -284,12 +387,21 @@ class Bullet {
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
+    /**
+     * Check if bullet is off screen
+     * @returns {boolean} True if bullet is off screen
+     */
     isOffScreen() {
         return this.y < 0 || this.y > CONFIG.HEIGHT;
     }
 }
 
-// Collision detection
+/**
+ * Check collision between two objects
+ * @param {Object} obj1 - First object with x, y, width, height
+ * @param {Object} obj2 - Second object with x, y, width, height
+ * @returns {boolean} True if objects are colliding
+ */
 function checkCollision(obj1, obj2) {
     return obj1.x < obj2.x + obj2.width &&
            obj1.x + obj1.width > obj2.x &&
@@ -297,14 +409,62 @@ function checkCollision(obj1, obj2) {
            obj1.y + obj1.height > obj2.y;
 }
 
-// Initialize game
+/**
+ * Load high score from localStorage
+ * @returns {number} High score or 0 if not found
+ */
+function loadHighScore() {
+    try {
+        const score = localStorage.getItem(CONFIG.HIGH_SCORE_KEY);
+        return score ? parseInt(score, 10) : 0;
+    } catch (error) {
+        console.error('Failed to load high score:', error);
+        return 0;
+    }
+}
+
+/**
+ * Save high score to localStorage
+ * @param {number} score - Score to save
+ */
+function saveHighScore(score) {
+    try {
+        localStorage.setItem(CONFIG.HIGH_SCORE_KEY, score.toString());
+    } catch (error) {
+        console.error('Failed to save high score:', error);
+    }
+}
+
+/**
+ * Update high score if current score is higher
+ */
+function updateHighScore() {
+    if (gameState.score > gameState.highScore) {
+        gameState.highScore = gameState.score;
+        saveHighScore(gameState.highScore);
+    }
+}
+
+/**
+ * Initialize game state and objects
+ */
 function initGame() {
     gameState.canvas = document.getElementById('gameCanvas');
     gameState.ctx = gameState.canvas.getContext('2d');
+    
+    if (!gameState.canvas || !gameState.ctx) {
+        console.error('Failed to initialize canvas');
+        alert('Error: Could not initialize game canvas. Please try a different browser.');
+        return;
+    }
+    
     gameState.canvas.width = CONFIG.WIDTH;
     gameState.canvas.height = CONFIG.HEIGHT;
     
     gameState.audio = new AudioSystem();
+    
+    // Load high score
+    gameState.highScore = loadHighScore();
     
     // Reset game state
     gameState.level = 1;
@@ -322,14 +482,24 @@ function initGame() {
     updateHUD();
 }
 
-// Update HUD
+/**
+ * Update HUD display
+ */
 function updateHUD() {
     document.getElementById('lives').textContent = gameState.lives;
     document.getElementById('level').textContent = gameState.level;
     document.getElementById('score').textContent = gameState.score;
+    
+    // Update high score display if it exists
+    const highScoreElement = document.getElementById('highScore');
+    if (highScoreElement) {
+        highScoreElement.textContent = gameState.highScore;
+    }
 }
 
-// Next level
+/**
+ * Advance to next level
+ */
 function nextLevel() {
     gameState.level++;
     gameState.bullets = [];
@@ -339,7 +509,10 @@ function nextLevel() {
     updateHUD();
 }
 
-// Game loop
+/**
+ * Main game loop
+ * @param {number} timestamp - Current timestamp from requestAnimationFrame
+ */
 function gameLoop(timestamp) {
     if (!gameState.isRunning) return;
     if (gameState.isPaused) {
@@ -421,8 +594,14 @@ function gameLoop(timestamp) {
     requestAnimationFrame(gameLoop);
 }
 
-// Draw stars background
+/**
+ * Draw stars background
+ */
 let stars = [];
+
+/**
+ * Initialize stars for background
+ */
 function initStars() {
     stars = [];
     for (let i = 0; i < 100; i++) {
@@ -434,6 +613,9 @@ function initStars() {
     }
 }
 
+/**
+ * Draw stars on canvas
+ */
 function drawStars() {
     gameState.ctx.fillStyle = '#fff';
     stars.forEach(star => {
@@ -441,7 +623,9 @@ function drawStars() {
     });
 }
 
-// Start game
+/**
+ * Start the game
+ */
 function startGame() {
     hideAllScreens();
     document.getElementById('gameScreen').classList.remove('hidden');
@@ -450,12 +634,17 @@ function startGame() {
     initStars();
     gameState.isRunning = true;
     gameState.isPaused = false;
-    gameState.audio.playRetroMusic();
+    
+    if (gameState.isMusicEnabled) {
+        gameState.audio.playRetroMusic();
+    }
     
     requestAnimationFrame(gameLoop);
 }
 
-// Pause game
+/**
+ * Toggle pause state
+ */
 function togglePause() {
     if (!gameState.isRunning) return;
     
@@ -468,36 +657,75 @@ function togglePause() {
     }
 }
 
-// Game over
+/**
+ * Toggle music on/off
+ */
+function toggleMusic() {
+    gameState.isMusicEnabled = !gameState.isMusicEnabled;
+    
+    if (gameState.isMusicEnabled && gameState.isRunning && !gameState.isPaused) {
+        gameState.audio.playRetroMusic();
+    } else {
+        gameState.audio.stopMusic();
+    }
+    
+    // Update music button text if it exists
+    const musicButton = document.getElementById('musicToggle');
+    if (musicButton) {
+        musicButton.textContent = gameState.isMusicEnabled ? '🔊 MÚSICA: ON' : '🔇 MÚSICA: OFF';
+    }
+}
+
+/**
+ * Handle game over
+ */
 function gameOver() {
     gameState.isRunning = false;
     gameState.audio.stopMusic();
     
+    updateHighScore();
+    
     document.getElementById('gameOverScore').textContent = gameState.score;
+    const gameOverHighScore = document.getElementById('gameOverHighScore');
+    if (gameOverHighScore) {
+        gameOverHighScore.textContent = gameState.highScore;
+    }
     
     hideAllScreens();
     document.getElementById('gameOverScreen').classList.remove('hidden');
 }
 
-// Victory
+/**
+ * Handle victory
+ */
 function victory() {
     gameState.isRunning = false;
     gameState.audio.stopMusic();
     
+    updateHighScore();
+    
     document.getElementById('finalScore').textContent = gameState.score;
+    const victoryHighScore = document.getElementById('victoryHighScore');
+    if (victoryHighScore) {
+        victoryHighScore.textContent = gameState.highScore;
+    }
     
     hideAllScreens();
     document.getElementById('victoryScreen').classList.remove('hidden');
 }
 
-// Hide all screens
+/**
+ * Hide all screens
+ */
 function hideAllScreens() {
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.add('hidden');
     });
 }
 
-// Event listeners
+/**
+ * Event listeners setup
+ */
 document.addEventListener('DOMContentLoaded', () => {
     // Start button
     document.getElementById('startButton').addEventListener('click', startGame);
@@ -507,6 +735,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Retry button
     document.getElementById('retryButton').addEventListener('click', startGame);
+    
+    // Music toggle button (if exists)
+    const musicToggle = document.getElementById('musicToggle');
+    if (musicToggle) {
+        musicToggle.addEventListener('click', toggleMusic);
+    }
+    
+    // Load and display high score on start screen
+    gameState.highScore = loadHighScore();
+    const startHighScore = document.getElementById('startHighScore');
+    if (startHighScore) {
+        startHighScore.textContent = gameState.highScore;
+    }
     
     // Keyboard controls
     document.addEventListener('keydown', (e) => {
@@ -522,6 +763,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'p' || e.key === 'P') {
             e.preventDefault();
             togglePause();
+        }
+        
+        // Toggle music
+        if (e.key === 'm' || e.key === 'M') {
+            e.preventDefault();
+            toggleMusic();
         }
     });
     

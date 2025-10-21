@@ -83,6 +83,7 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
     padding: 20px 40px;
+    margin: 10px;
     background: #000;
     color: #0f0;
     border: 3px solid #0f0;
@@ -102,6 +103,25 @@ body {
         0 0 20px #0f0,
         0 0 30px #00ff00,
         inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.retro-button.secondary {
+    font-size: 1.2rem;
+    padding: 15px 30px;
+    border-color: #0a0;
+    color: #0a0;
+    box-shadow: 
+        0 0 5px #0a0,
+        inset 0 0 5px rgba(0, 255, 0, 0.1);
+}
+
+.retro-button.secondary:hover {
+    background: #0a0;
+    color: #000;
+    box-shadow: 
+        0 0 15px #0a0,
+        0 0 20px #00ff00,
+        inset 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
 .controls-info {
@@ -225,4 +245,18 @@ body {
         0 0 10px #0ff,
         0 0 20px #0ff;
     margin-top: 10px;
+}
+
+.high-score-display {
+    margin-top: 20px;
+    font-size: 1.3rem;
+    color: #ff0;
+    text-shadow: 0 0 10px #ff0;
+}
+
+.high-score-label {
+    font-size: 1.1rem;
+    color: #ff0;
+    text-shadow: 0 0 10px #ff0;
+    margin-top: 15px;
 }
