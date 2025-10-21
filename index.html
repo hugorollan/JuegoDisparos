@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Shooter Retro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Start Screen -->
+    <div id="startScreen" class="screen">
+        <div class="title-container">
+            <h1 class="retro-title">SPACE SHOOTER</h1>
+            <p class="subtitle">Año 1990</p>
+        </div>
+        <button id="startButton" class="retro-button">EMPEZAR A JUGAR</button>
+        <div class="controls-info">
+            <p>CONTROLES:</p>
+            <p>← → MOVER | ESPACIO DISPARAR | P PAUSA</p>
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen hidden">
+        <div id="hud">
+            <div class="hud-item">VIDAS: <span id="lives">3</span></div>
+            <div class="hud-item">NIVEL: <span id="level">1</span></div>
+            <div class="hud-item">PUNTOS: <span id="score">0</span></div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Pause Screen -->
+    <div id="pauseScreen" class="screen hidden overlay">
+        <div class="menu-box">
+            <h2 class="retro-title">PAUSA</h2>
+            <p>Presiona P para continuar</p>
+        </div>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victoryScreen" class="screen hidden">
+        <div class="victory-container">
+            <h1 class="retro-title victory-text">CONGRATULATIONS!</h1>
+            <p class="victory-message">¡Has derrotado al jefe final!</p>
+            <div class="final-score">
+                <p>PUNTUACIÓN FINAL:</p>
+                <p class="score-value" id="finalScore">0</p>
+            </div>
+            <button id="restartButton" class="retro-button">JUGAR DE NUEVO</button>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="screen hidden">
+        <div class="gameover-container">
+            <h1 class="retro-title gameover-text">GAME OVER</h1>
+            <div class="final-score">
+                <p>PUNTUACIÓN:</p>
+                <p class="score-value" id="gameOverScore">0</p>
+            </div>
+            <button id="retryButton" class="retro-button">INTENTAR DE NUEVO</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
