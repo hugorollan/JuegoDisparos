@@ -1,0 +1,228 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: #000;
+    color: #0f0;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+}
+
+.screen.hidden {
+    display: none;
+}
+
+.overlay {
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 100;
+}
+
+.retro-title {
+    font-size: 4rem;
+    font-weight: bold;
+    text-shadow: 
+        0 0 10px #0f0,
+        0 0 20px #0f0,
+        0 0 30px #0f0,
+        0 0 40px #00ff00,
+        2px 2px 0px #000;
+    letter-spacing: 0.2em;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 
+            0 0 10px #0f0,
+            0 0 20px #0f0,
+            0 0 30px #0f0,
+            0 0 40px #00ff00,
+            2px 2px 0px #000;
+    }
+    to {
+        text-shadow: 
+            0 0 20px #0f0,
+            0 0 30px #00ff00,
+            0 0 40px #00ff00,
+            0 0 50px #00ff00,
+            2px 2px 0px #000;
+    }
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    margin-top: 10px;
+    color: #0a0;
+}
+
+.title-container {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.retro-button {
+    font-family: 'Courier New', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 20px 40px;
+    background: #000;
+    color: #0f0;
+    border: 3px solid #0f0;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 
+        0 0 10px #0f0,
+        inset 0 0 10px rgba(0, 255, 0, 0.1);
+    transition: all 0.3s;
+}
+
+.retro-button:hover {
+    background: #0f0;
+    color: #000;
+    box-shadow: 
+        0 0 20px #0f0,
+        0 0 30px #00ff00,
+        inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.controls-info {
+    position: absolute;
+    bottom: 50px;
+    text-align: center;
+    font-size: 1rem;
+    color: #0a0;
+    line-height: 1.8;
+}
+
+#gameScreen {
+    background: #000;
+}
+
+#gameCanvas {
+    display: block;
+    background: #000;
+    border: 3px solid #0f0;
+    box-shadow: 
+        0 0 20px #0f0,
+        inset 0 0 20px rgba(0, 255, 0, 0.1);
+}
+
+#hud {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.hud-item {
+    color: #0f0;
+    text-shadow: 0 0 10px #0f0;
+}
+
+.menu-box {
+    background: #000;
+    border: 3px solid #0f0;
+    padding: 50px 80px;
+    text-align: center;
+    box-shadow: 
+        0 0 20px #0f0,
+        inset 0 0 20px rgba(0, 255, 0, 0.1);
+}
+
+.menu-box h2 {
+    margin-bottom: 30px;
+}
+
+.menu-box p {
+    font-size: 1.2rem;
+    color: #0a0;
+}
+
+.victory-container,
+.gameover-container {
+    text-align: center;
+}
+
+.victory-text {
+    color: #ffff00;
+    text-shadow: 
+        0 0 10px #ffff00,
+        0 0 20px #ffff00,
+        0 0 30px #ffff00,
+        0 0 40px #ff0,
+        2px 2px 0px #000;
+    animation: victory-glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes victory-glow {
+    from {
+        text-shadow: 
+            0 0 10px #ffff00,
+            0 0 20px #ffff00,
+            0 0 30px #ffff00,
+            0 0 40px #ff0,
+            2px 2px 0px #000;
+    }
+    to {
+        text-shadow: 
+            0 0 20px #ffff00,
+            0 0 30px #ff0,
+            0 0 40px #ff0,
+            0 0 50px #ff0,
+            2px 2px 0px #000;
+    }
+}
+
+.gameover-text {
+    color: #ff0000;
+    text-shadow: 
+        0 0 10px #ff0000,
+        0 0 20px #ff0000,
+        0 0 30px #ff0000,
+        0 0 40px #f00,
+        2px 2px 0px #000;
+}
+
+.victory-message {
+    font-size: 1.5rem;
+    margin: 20px 0;
+    color: #0f0;
+}
+
+.final-score {
+    margin: 40px 0;
+    font-size: 1.3rem;
+}
+
+.score-value {
+    font-size: 3rem;
+    color: #0ff;
+    text-shadow: 
+        0 0 10px #0ff,
+        0 0 20px #0ff;
+    margin-top: 10px;
+}
