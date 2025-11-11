@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, PanResponder } from 'react-native';
-import { Canvas, useDrawCallback, Skia } from '@shopify/react-native-skia';
-import { Player, Enemy, Bullet, checkCollision, generateStars } from '../classes/GameObjects';
+import { View, StyleSheet, TouchableOpacity, Text, Animated, Dimensions } from 'react-native';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function GameCanvas({
   config,
@@ -17,217 +17,156 @@ export default function GameCanvas({
   highScore,
   isMusicEnabled
 }) {
-  const [touchX, setTouchX] = useState(config.WIDTH / 2);
-  const gameStateRef = useRef({
-    player: null,
-    enemy: null,
-    bullets: [],
-    enemyBullets: [],
-    stars: [],
-    lastEnemyShot: 0,
-    isRunning: true,
-  });
+  const [playerX, setPlayerX] = useState(config.WIDTH / 2 - config.PLAYER_SIZE / 2);
+  const [enemyX, setEnemyX] = useState(config.WIDTH / 2 - config.ENEMY_SIZE / 2);
+  const [enemyDirection, setEnemyDirection] = useState(1);
+  const [enemyHealth, setEnemyHealth] = useState(level * 2);
+  const [maxEnemyHealth, setMaxEnemyHealth] = useState(level * 2);
+  const [bullets, setBullets] = useState([]);
+  const [enemyBullets, setEnemyBullets] = useState([]);
+  const [stars, setStars] = useState([]);
+  const [isBoss, setIsBoss] = useState(level >= 5);
+  
+  const gameLoopRef = useRef(null);
+  const lastEnemyShotRef = useRef(0);
+  const touchXRef = useRef(config.WIDTH / 2);
 
   useEffect(() => {
-    // Initialize game objects
-    gameStateRef.current.player = new Player(
-      config.WIDTH / 2 - config.PLAYER_SIZE / 2,
-      config.HEIGHT - config.PLAYER_SIZE - 20,
-      config.PLAYER_SIZE,
-      config.PLAYER_SIZE,
-      config.PLAYER_SPEED
-    );
-    gameStateRef.current.enemy = new Enemy(
-      config.WIDTH / 2 - config.ENEMY_SIZE / 2,
-      50,
-      level,
-      config.WIDTH
-    );
-    gameStateRef.current.stars = generateStars(config.WIDTH, config.HEIGHT);
+    // Initialize stars
+    const newStars = [];
+    for (let i = 0; i < 100; i++) {
+      newStars.push({
+        id: i,
+        x: Math.random() * config.WIDTH,
+        y: Math.random() * config.HEIGHT,
+        size: Math.random() * 2 + 1
+      });
+    }
+    setStars(newStars);
+
+    // Start game loop
+    gameLoopRef.current = setInterval(() => {
+      updateGame();
+    }, 1000 / 60); // 60 FPS
+
+    return () => {
+      if (gameLoopRef.current) {
+        clearInterval(gameLoopRef.current);
+      }
+    };
   }, []);
 
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: (evt) => {
-        setTouchX(evt.nativeEvent.locationX);
-      },
-      onPanResponderMove: (evt) => {
-        setTouchX(evt.nativeEvent.locationX);
-      },
-    })
-  ).current;
-
-  const onDraw = useDrawCallback((canvas, info) => {
-    const state = gameStateRef.current;
-    if (!state.isRunning) return;
-
-    // Clear canvas
-    const paint = Skia.Paint();
-    paint.setColor(Skia.Color('#000'));
-    canvas.drawRect({ x: 0, y: 0, width: config.WIDTH, height: config.HEIGHT }, paint);
-
-    // Draw stars
-    const starPaint = Skia.Paint();
-    starPaint.setColor(Skia.Color('#fff'));
-    state.stars.forEach(star => {
-      canvas.drawRect(
-        { x: star.x, y: star.y, width: star.size, height: star.size },
-        starPaint
-      );
-    });
-
-    // Update and draw player
-    if (state.player) {
-      state.player.update(touchX, config.WIDTH);
-      drawPlayer(canvas, state.player);
-    }
-
-    // Update and draw enemy
-    if (state.enemy) {
-      state.enemy.update();
-      drawEnemy(canvas, state.enemy);
-
-      // Enemy shooting
-      const currentTime = Date.now();
-      if (currentTime - state.lastEnemyShot > state.enemy.shootInterval) {
-        const bulletX = state.enemy.x + state.enemy.width / 2 - config.ENEMY_BULLET_SIZE / 2;
-        state.enemyBullets.push(
-          new Bullet(bulletX, state.enemy.y + state.enemy.height, 1, config.ENEMY_BULLET_SIZE)
-        );
-        state.lastEnemyShot = currentTime;
-      }
-    }
-
-    // Update and draw bullets
-    state.bullets = state.bullets.filter(bullet => {
-      bullet.update();
-      drawBullet(canvas, bullet);
-
-      // Check collision with enemy
-      if (state.enemy && checkCollision(bullet, state.enemy)) {
-        if (state.enemy.takeDamage()) {
-          const points = level * 100;
-          setScore(score + points);
-
-          if (state.enemy.isBoss) {
-            state.isRunning = false;
-            onVictory(score + points);
-            return false;
-          }
-
-          // Next level
-          setLevel(level + 1);
-          state.enemy = new Enemy(
-            config.WIDTH / 2 - config.ENEMY_SIZE / 2,
-            50,
-            level + 1,
-            config.WIDTH
-          );
-          state.bullets = [];
-          state.enemyBullets = [];
+  const updateGame = () => {
+    // Update player position
+    setPlayerX(prev => {
+      const diff = touchXRef.current - prev;
+      if (Math.abs(diff) > 5) {
+        if (diff > 0 && prev < config.WIDTH - config.PLAYER_SIZE) {
+          return prev + Math.min(config.PLAYER_SPEED, diff);
+        } else if (diff < 0 && prev > 0) {
+          return prev + Math.max(-config.PLAYER_SPEED, diff);
         }
-        return false;
       }
-
-      return !bullet.isOffScreen(config.HEIGHT);
+      return prev;
     });
 
-    // Update and draw enemy bullets
-    state.enemyBullets = state.enemyBullets.filter(bullet => {
-      bullet.update();
-      drawBullet(canvas, bullet);
+    // Update enemy position
+    setEnemyX(prev => {
+      const newX = prev + (config.BASE_ENEMY_SPEED + (level - 1) * 0.5) * enemyDirection;
+      if (newX <= 0 || newX >= config.WIDTH - config.ENEMY_SIZE) {
+        setEnemyDirection(d => -d);
+        return prev;
+      }
+      return newX;
+    });
 
-      // Check collision with player
-      if (state.player && checkCollision(bullet, state.player)) {
-        const newLives = lives - 1;
-        setLives(newLives);
+    // Enemy shooting
+    const currentTime = Date.now();
+    const shootInterval = Math.max(500, config.BASE_ENEMY_SHOOT_INTERVAL - (level - 1) * 200);
+    if (currentTime - lastEnemyShotRef.current > shootInterval) {
+      const bulletX = enemyX + config.ENEMY_SIZE / 2 - config.ENEMY_BULLET_SIZE / 2;
+      setEnemyBullets(prev => [...prev, { id: Date.now(), x: bulletX, y: 50 + config.ENEMY_SIZE }]);
+      lastEnemyShotRef.current = currentTime;
+    }
 
-        if (newLives <= 0) {
-          state.isRunning = false;
-          onGameOver(score);
+    // Update bullets
+    setBullets(prev => {
+      const newBullets = prev.map(bullet => ({
+        ...bullet,
+        y: bullet.y - config.BULLET_SPEED
+      })).filter(bullet => {
+        // Check collision with enemy
+        if (
+          bullet.x < enemyX + config.ENEMY_SIZE &&
+          bullet.x + config.BULLET_SIZE > enemyX &&
+          bullet.y < 50 + config.ENEMY_SIZE &&
+          bullet.y + config.BULLET_SIZE * 3 > 50
+        ) {
+          const newHealth = enemyHealth - 1;
+          setEnemyHealth(newHealth);
+          
+          if (newHealth <= 0) {
+            const points = level * 100;
+            setScore(score + points);
+
+            if (isBoss) {
+              onVictory(score + points);
+            } else {
+              // Next level
+              const newLevel = level + 1;
+              setLevel(newLevel);
+              setEnemyHealth(newLevel * 2);
+              setMaxEnemyHealth(newLevel * 2);
+              setIsBoss(newLevel >= 5);
+              setBullets([]);
+              setEnemyBullets([]);
+            }
+          }
           return false;
         }
-        return false;
-      }
-
-      return !bullet.isOffScreen(config.HEIGHT);
+        
+        return bullet.y > 0;
+      });
+      return newBullets;
     });
-  }, [touchX, score, lives, level]);
 
-  const drawPlayer = (canvas, player) => {
-    const { x, y, width, height } = player;
-    
-    // Create path for spaceship
-    const path = Skia.Path.Make();
-    path.moveTo(x + width / 2, y);
-    path.lineTo(x, y + height);
-    path.lineTo(x + width / 2, y + height - 10);
-    path.lineTo(x + width, y + height);
-    path.close();
-    
-    const paint = Skia.Paint();
-    paint.setColor(Skia.Color('#0ff'));
-    canvas.drawPath(path, paint);
-    
-    // Cockpit
-    const cockpitPaint = Skia.Paint();
-    cockpitPaint.setColor(Skia.Color('#fff'));
-    canvas.drawRect(
-      { x: x + width / 2 - 5, y: y + 10, width: 10, height: 10 },
-      cockpitPaint
-    );
+    // Update enemy bullets
+    setEnemyBullets(prev => {
+      const newBullets = prev.map(bullet => ({
+        ...bullet,
+        y: bullet.y + config.BULLET_SPEED
+      })).filter(bullet => {
+        // Check collision with player
+        if (
+          bullet.x < playerX + config.PLAYER_SIZE &&
+          bullet.x + config.ENEMY_BULLET_SIZE > playerX &&
+          bullet.y < config.HEIGHT - config.PLAYER_SIZE - 20 + config.PLAYER_SIZE &&
+          bullet.y + config.ENEMY_BULLET_SIZE * 3 > config.HEIGHT - config.PLAYER_SIZE - 20
+        ) {
+          const newLives = lives - 1;
+          setLives(newLives);
+
+          if (newLives <= 0) {
+            onGameOver(score);
+          }
+          return false;
+        }
+        
+        return bullet.y < config.HEIGHT;
+      });
+      return newBullets;
+    });
   };
 
-  const drawEnemy = (canvas, enemy) => {
-    const { x, y, width, height, isBoss, health, maxHealth } = enemy;
-    
-    // Create path for enemy ship
-    const path = Skia.Path.Make();
-    path.moveTo(x + width / 2, y + height);
-    path.lineTo(x, y);
-    path.lineTo(x + width / 2, y + 10);
-    path.lineTo(x + width, y);
-    path.close();
-    
-    const paint = Skia.Paint();
-    paint.setColor(Skia.Color(isBoss ? '#f00' : '#ff0'));
-    canvas.drawPath(path, paint);
-    
-    // Health bar background
-    const healthBgPaint = Skia.Paint();
-    healthBgPaint.setColor(Skia.Color('#333'));
-    canvas.drawRect(
-      { x, y: y - 15, width, height: 5 },
-      healthBgPaint
-    );
-    
-    // Health bar
-    const healthPercent = health / maxHealth;
-    const healthPaint = Skia.Paint();
-    healthPaint.setColor(Skia.Color(isBoss ? '#f00' : '#0f0'));
-    canvas.drawRect(
-      { x, y: y - 15, width: width * healthPercent, height: 5 },
-      healthPaint
-    );
-  };
-
-  const drawBullet = (canvas, bullet) => {
-    const paint = Skia.Paint();
-    paint.setColor(Skia.Color(bullet.direction === -1 ? '#0ff' : '#f00'));
-    canvas.drawRect(
-      { x: bullet.x, y: bullet.y, width: bullet.width, height: bullet.height },
-      paint
-    );
+  const handleTouch = (event) => {
+    const { locationX } = event.nativeEvent;
+    touchXRef.current = locationX;
   };
 
   const shoot = () => {
-    const state = gameStateRef.current;
-    if (state.player) {
-      const bulletX = state.player.x + state.player.width / 2 - config.BULLET_SIZE / 2;
-      state.bullets.push(new Bullet(bulletX, state.player.y, -1, config.BULLET_SIZE));
-    }
+    const bulletX = playerX + config.PLAYER_SIZE / 2 - config.BULLET_SIZE / 2;
+    const bulletY = config.HEIGHT - config.PLAYER_SIZE - 20;
+    setBullets(prev => [...prev, { id: Date.now(), x: bulletX, y: bulletY }]);
   };
 
   return (
@@ -240,12 +179,92 @@ export default function GameCanvas({
         <Text style={styles.hudText}>RÉCORD: {highScore}</Text>
       </View>
 
-      {/* Game Canvas */}
-      <View {...panResponder.panHandlers} style={styles.canvasContainer}>
-        <Canvas
-          style={{ width: config.WIDTH, height: config.HEIGHT }}
-          onDraw={onDraw}
-        />
+      {/* Game Area */}
+      <View 
+        style={[styles.gameArea, { width: config.WIDTH, height: config.HEIGHT }]}
+        onTouchMove={handleTouch}
+        onTouchStart={handleTouch}
+      >
+        {/* Stars */}
+        {stars.map(star => (
+          <View
+            key={star.id}
+            style={[
+              styles.star,
+              {
+                left: star.x,
+                top: star.y,
+                width: star.size,
+                height: star.size,
+              }
+            ]}
+          />
+        ))}
+
+        {/* Player */}
+        <View style={[styles.player, { left: playerX, top: config.HEIGHT - config.PLAYER_SIZE - 20 }]}>
+          <View style={styles.playerShip} />
+          <View style={styles.playerCockpit} />
+        </View>
+
+        {/* Enemy */}
+        <View style={[
+          styles.enemy,
+          {
+            left: enemyX,
+            top: 50,
+            width: isBoss ? config.ENEMY_SIZE * 1.5 : config.ENEMY_SIZE,
+            height: isBoss ? config.ENEMY_SIZE * 1.5 : config.ENEMY_SIZE,
+            borderTopColor: isBoss ? '#f00' : '#ff0',
+          }
+        ]}>
+          <View style={styles.healthBarContainer}>
+            <View style={styles.healthBarBg} />
+            <View 
+              style={[
+                styles.healthBar,
+                {
+                  width: `${(enemyHealth / maxEnemyHealth) * 100}%`,
+                  backgroundColor: isBoss ? '#f00' : '#0f0',
+                }
+              ]} 
+            />
+          </View>
+        </View>
+
+        {/* Player Bullets */}
+        {bullets.map(bullet => (
+          <View
+            key={bullet.id}
+            style={[
+              styles.bullet,
+              {
+                left: bullet.x,
+                top: bullet.y,
+                width: config.BULLET_SIZE,
+                height: config.BULLET_SIZE * 3,
+                backgroundColor: '#0ff',
+              }
+            ]}
+          />
+        ))}
+
+        {/* Enemy Bullets */}
+        {enemyBullets.map(bullet => (
+          <View
+            key={bullet.id}
+            style={[
+              styles.bullet,
+              {
+                left: bullet.x,
+                top: bullet.y,
+                width: config.ENEMY_BULLET_SIZE,
+                height: config.ENEMY_BULLET_SIZE * 3,
+                backgroundColor: '#f00',
+              }
+            ]}
+          />
+        ))}
       </View>
 
       {/* Controls */}
@@ -274,16 +293,76 @@ const styles = StyleSheet.create({
   },
   hudText: {
     color: '#0f0',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     textShadowColor: '#0f0',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
   },
-  canvasContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  gameArea: {
+    backgroundColor: '#000',
+    position: 'relative',
+    alignSelf: 'center',
+  },
+  star: {
+    position: 'absolute',
+    backgroundColor: '#fff',
+  },
+  player: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+  },
+  playerShip: {
+    width: 0,
+    height: 0,
+    backgroundColor: 'transparent',
+    borderStyle: 'solid',
+    borderLeftWidth: 20,
+    borderRightWidth: 20,
+    borderBottomWidth: 40,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: '#0ff',
+  },
+  playerCockpit: {
+    position: 'absolute',
+    top: 10,
+    left: 15,
+    width: 10,
+    height: 10,
+    backgroundColor: '#fff',
+  },
+  enemy: {
+    position: 'absolute',
+    width: 60,
+    height: 60,
+    borderStyle: 'solid',
+    borderTopWidth: 60,
+    borderLeftWidth: 30,
+    borderRightWidth: 30,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+  },
+  healthBarContainer: {
+    position: 'absolute',
+    top: -15,
+    left: 0,
+    right: 0,
+    height: 5,
+  },
+  healthBarBg: {
+    position: 'absolute',
+    width: '100%',
+    height: 5,
+    backgroundColor: '#333',
+  },
+  healthBar: {
+    position: 'absolute',
+    height: 5,
+  },
+  bullet: {
+    position: 'absolute',
   },
   controls: {
     flexDirection: 'row',
