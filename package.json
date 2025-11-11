@@ -1,0 +1,26 @@
+{
+  "name": "tercer-proyecto-juego-de-disparos",
+  "version": "1.0.0",
+  "description": "A classic retro-style space shooter game built with HTML5 Canvas and vanilla JavaScript. Experience the nostalgia of 1990s arcade games with modern web technologies!",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@shopify/react-native-skia": "2.2.12",
+    "expo": "^54.0.23",
+    "expo-av": "^16.0.7",
+    "expo-status-bar": "^3.0.8",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-canvas": "^0.1.40",
+    "react-native-web": "^0.21.2"
+  }
+}
