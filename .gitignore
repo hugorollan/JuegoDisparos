@@ -48,3 +48,31 @@ coverage/
 .env
 .env.local
 .env.*.local
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# React Native
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro
+.metro-health-check*
+
+# Package manager
+package-lock.json
+yarn.lock
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*

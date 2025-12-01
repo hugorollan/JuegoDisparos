@@ -1,172 +1,219 @@
-# Space Shooter Retro 🚀
+# Space Shooter Retro 🚀 - Mobile Edition
 
-A classic retro-style space shooter game built with HTML5 Canvas and vanilla JavaScript. Experience the nostalgia of 1990s arcade games with modern web technologies!
+Una versión móvil del clásico juego de disparos espaciales estilo retro, desarrollado con React Native y Expo. ¡Experimenta la nostalgia de los juegos arcade de los 90 en tu dispositivo móvil!
 
-## 🎮 Features
+## 🎮 Características
 
-- **Retro Graphics**: Authentic pixel-art style with neon glow effects
-- **Progressive Difficulty**: Each level increases enemy speed and shooting frequency
-- **Boss Battles**: Face challenging boss enemies starting from level 5
-- **High Score System**: Track your best performances with localStorage
-- **Retro Sound Effects**: Procedurally generated chiptune music and sound effects
-- **Responsive Controls**: Smooth keyboard controls with pause functionality
-- **Multiple Screens**: Start menu, pause screen, game over, and victory screens
+- **Gráficos Retro**: Estilo auténtico pixel-art con efectos de neón brillante
+- **Dificultad Progresiva**: Cada nivel aumenta la velocidad y frecuencia de disparo del enemigo
+- **Batallas contra Jefes**: Enfrenta enemigos jefe desafiantes desde el nivel 5
+- **Sistema de Puntuación Alta**: Guarda tus mejores desempeños con AsyncStorage
+- **Controles Táctiles**: Controles suaves optimizados para dispositivos móviles
+- **Múltiples Pantallas**: Menú de inicio, pausa, game over y pantallas de victoria
 
-## 🕹️ How to Play
+## 🕹️ Cómo Jugar
 
-### Controls
-- **← →** (Arrow Keys) - Move spaceship left and right
-- **SPACE** - Shoot bullets
-- **P** - Pause/Resume game
-- **M** - Toggle music on/off
+### Controles
+- **Tocar y arrastrar** - Mover la nave espacial
+- **Botón DISPARAR** - Disparar balas
+- **Botón PAUSA** - Pausar/Reanudar juego
 
-### Objective
-- Destroy enemies by shooting them
-- Avoid enemy bullets to preserve your lives (you have 3 lives)
-- Progress through levels with increasing difficulty
-- Defeat the boss at level 5 and beyond to win!
+### Objetivo
+- Destruye enemigos disparándoles
+- Evita las balas enemigas para preservar tus vidas (tienes 3 vidas)
+- Progresa a través de niveles con dificultad creciente
+- ¡Derrota al jefe en el nivel 5 y más allá para ganar!
 
-### Scoring
-- Each enemy hit awards points based on the current level
-- Score = Level × 100 points per enemy defeated
-- Try to beat your high score!
+### Puntuación
+- Cada golpe al enemigo otorga puntos basados en el nivel actual
+- Puntuación = Nivel × 100 puntos por enemigo derrotado
+- ¡Intenta superar tu puntuación más alta!
 
-## 🚀 Getting Started
+## 🚀 Comenzar
 
-### Prerequisites
-- A modern web browser (Chrome, Firefox, Safari, or Edge)
-- No additional dependencies required!
+### Requisitos Previos
+- Node.js (v14 o superior)
+- npm o yarn
+- Expo CLI
+- Para desarrollo móvil:
+  - Aplicación Expo Go en tu dispositivo iOS/Android, o
+  - Emulador iOS/Android
 
-### Installation
+### Instalación
 
-1. Clone the repository:
+1. Clona el repositorio:
 ```bash
-git clone https://github.com/hugorollan/JuegoDisparos.git
-cd JuegoDisparos
+git clone https://github.com/hugorollan/Tercer-Proyecto-Juego-de-Disparos.git
+cd Tercer-Proyecto-Juego-de-Disparos
 ```
 
-2. Open `index.html` in your web browser:
+2. Instala las dependencias:
 ```bash
-# On macOS
-open index.html
-
-# On Linux
-xdg-open index.html
-
-# On Windows
-start index.html
+npm install
 ```
 
-Or simply drag and drop `index.html` into your browser window.
-
-### Running with a Local Server (Optional)
-
-For the best experience, you can run it with a local server:
-
+3. Inicia el servidor de desarrollo de Expo:
 ```bash
-# Using Python 3
-python -m http.server 8000
-
-# Using Node.js (with http-server)
-npx http-server
-
-# Using PHP
-php -S localhost:8000
+npm start
 ```
 
-Then navigate to `http://localhost:8000` in your browser.
+4. Ejecuta en tu dispositivo o emulador:
+```bash
+# Para iOS
+npm run ios
 
-## 📁 Project Structure
+# Para Android
+npm run android
 
-```
-JuegoDisparos/
-├── index.html          # Main HTML file with game structure
-├── style.css           # Retro-styled CSS with neon effects
-├── game.js             # Game logic, classes, and engine
-├── README.md           # This file
-├── LICENSE             # MIT License
-└── CONTRIBUTING.md     # Contribution guidelines
+# Para web (navegador)
+npm run web
 ```
 
-## 🎨 Game Architecture
+### Usando Expo Go
 
-### Core Components
+1. Instala la aplicación Expo Go en tu dispositivo móvil:
+   - [iOS - App Store](https://apps.apple.com/app/expo-go/id982107779)
+   - [Android - Google Play](https://play.google.com/store/apps/details?id=host.exp.exponent)
 
-- **AudioSystem**: Manages retro chiptune music and sound effects using Web Audio API
-- **Player**: Handles player spaceship movement and shooting
-- **Enemy**: Manages enemy behavior, movement, and health
-- **Bullet**: Handles bullet physics for both player and enemy projectiles
-- **Game State**: Centralized state management for the entire game
+2. Escanea el código QR que aparece en la terminal después de ejecutar `npm start`
 
-### Technology Stack
+## 📁 Estructura del Proyecto
 
-- **HTML5 Canvas**: For rendering game graphics
-- **Web Audio API**: For procedural sound generation
-- **Vanilla JavaScript**: No frameworks or libraries
-- **CSS3**: For UI styling with retro effects
+```
+Tercer-Proyecto-Juego-de-Disparos/
+├── App.js                      # Componente principal de la aplicación
+├── app.json                    # Configuración de Expo
+├── package.json                # Dependencias del proyecto
+├── babel.config.js             # Configuración de Babel
+├── assets/                     # Recursos (iconos, imágenes)
+├── src/
+│   ├── components/
+│   │   └── GameCanvas.js       # Componente principal del canvas del juego
+│   ├── screens/
+│   │   ├── StartScreen.js      # Pantalla de inicio
+│   │   ├── GameOverScreen.js   # Pantalla de game over
+│   │   ├── VictoryScreen.js    # Pantalla de victoria
+│   │   └── PauseScreen.js      # Pantalla de pausa
+│   └── classes/
+│       └── GameObjects.js      # Clases del juego (Player, Enemy, Bullet)
+└── original-web-version/       # Versión web original del juego
+    ├── index.html
+    ├── game.js
+    └── style.css
+```
 
-## 🛠️ Customization
+## 🎨 Arquitectura del Juego
 
-You can easily customize the game by modifying the `CONFIG` object in `game.js`:
+### Componentes Principales
+
+- **App.js**: Gestiona el estado global del juego y la navegación entre pantallas
+- **GameCanvas**: Renderiza el juego usando React Native Skia para gráficos de alta performance
+- **GameObjects**: Clases para Player, Enemy, Bullet con lógica de física y colisiones
+- **Screens**: Componentes de UI para diferentes estados del juego
+
+### Stack Tecnológico
+
+- **React Native**: Framework para desarrollo móvil
+- **Expo**: Plataforma de desarrollo y despliegue
+- **@shopify/react-native-skia**: Biblioteca de renderizado de gráficos de alto rendimiento
+- **@react-native-async-storage/async-storage**: Almacenamiento persistente
+- **expo-av**: Sistema de audio (preparado para futuras implementaciones)
+
+## 🛠️ Personalización
+
+Puedes personalizar fácilmente el juego modificando el objeto `CONFIG` en `App.js`:
 
 ```javascript
 const CONFIG = {
-    WIDTH: 800,              // Canvas width
-    HEIGHT: 600,             // Canvas height
-    PLAYER_SPEED: 5,         // Player movement speed
-    BULLET_SPEED: 7,         // Bullet velocity
-    ENEMY_SIZE: 60,          // Enemy size in pixels
-    BASE_ENEMY_SPEED: 2,     // Initial enemy speed
-    BOSS_LEVEL: 5            // Level when boss appears
+  WIDTH: SCREEN_WIDTH,        // Ancho del canvas
+  HEIGHT: SCREEN_HEIGHT - 100,// Alto del canvas
+  PLAYER_SPEED: 8,            // Velocidad de movimiento del jugador
+  BULLET_SPEED: 10,           // Velocidad de las balas
+  ENEMY_SIZE: 60,             // Tamaño del enemigo en píxeles
+  BASE_ENEMY_SPEED: 3,        // Velocidad inicial del enemigo
+  BOSS_LEVEL: 5               // Nivel cuando aparece el jefe
 };
 ```
 
-## 🤝 Contributing
+## 📱 Despliegue
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+### Construcción para Producción
 
-### Ways to Contribute
+```bash
+# Construir para Android
+expo build:android
 
-- 🐛 Report bugs
-- 💡 Suggest new features
-- 🎨 Improve graphics or sound
-- 📝 Improve documentation
-- 🔧 Submit pull requests
+# Construir para iOS
+expo build:ios
+```
 
-## 📄 License
+### Publicar en las Tiendas
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Sigue la [documentación de Expo](https://docs.expo.dev/distribution/introduction/) para publicar tu aplicación en:
+- Apple App Store
+- Google Play Store
 
-## 🙏 Acknowledgments
+## 🤝 Contribuir
 
-- Inspired by classic arcade games like Space Invaders and Galaga
-- Built with passion for retro gaming aesthetics
-- Thanks to the open-source community
+¡Las contribuciones son bienvenidas! Por favor, consulta [CONTRIBUTING.md](CONTRIBUTING.md) para obtener detalles.
 
-## 📊 Browser Compatibility
+### Formas de Contribuir
 
-| Browser | Supported | Version |
-|---------|-----------|---------|
-| Chrome  | ✅        | 60+     |
-| Firefox | ✅        | 55+     |
-| Safari  | ✅        | 11+     |
-| Edge    | ✅        | 79+     |
+- 🐛 Reportar errores
+- 💡 Sugerir nuevas características
+- 🎨 Mejorar gráficos o sonido
+- 📝 Mejorar documentación
+- 🔧 Enviar pull requests
+
+## 📄 Licencia
+
+Este proyecto está licenciado bajo la Licencia MIT - consulta el archivo [LICENSE](LICENSE) para más detalles.
+
+## 🙏 Agradecimientos
+
+- Inspirado en juegos arcade clásicos como Space Invaders y Galaga
+- Construido con pasión por la estética de los juegos retro
+- Gracias a la comunidad de código abierto
+
+## 📊 Compatibilidad
+
+| Plataforma | Soportado | Versión |
+|------------|-----------|---------|
+| iOS        | ✅        | 13.0+   |
+| Android    | ✅        | 6.0+    |
+| Web        | ✅        | Moderno |
 
 ## 🎯 Roadmap
 
-- [ ] Add power-ups (shields, rapid fire, etc.)
-- [ ] Implement different enemy types
-- [ ] Add particle effects for explosions
-- [ ] Create mobile touch controls
-- [ ] Add achievement system
-- [ ] Implement leaderboard with backend
+- [x] Migrar a React Native con Expo
+- [x] Implementar controles táctiles
+- [x] Sistema de puntuación persistente
+- [ ] Agregar power-ups (escudos, fuego rápido, etc.)
+- [ ] Implementar diferentes tipos de enemigos
+- [ ] Agregar efectos de partículas para explosiones
+- [ ] Sistema de música y efectos de sonido
+- [ ] Sistema de logros
+- [ ] Implementar tabla de clasificación con backend
 
-## 📞 Contact
+## 📞 Contacto
 
 Hugo Rollan - [@hugorollan](https://github.com/hugorollan)
 
-Project Link: [https://github.com/hugorollan/JuegoDisparos](https://github.com/hugorollan/JuegoDisparos)
+Link del Proyecto: [https://github.com/hugorollan/Tercer-Proyecto-Juego-de-Disparos](https://github.com/hugorollan/Tercer-Proyecto-Juego-de-Disparos)
 
 ---
 
-Made with ❤️ and JavaScript
+## 🔄 Migración desde la Versión Web
+
+Este proyecto fue transformado de una aplicación web HTML5 Canvas a React Native con Expo. La versión web original se puede encontrar en la carpeta `original-web-version/`.
+
+### Principales Cambios:
+- Canvas HTML5 → React Native Skia
+- Controles de teclado → Controles táctiles
+- LocalStorage → AsyncStorage
+- Web Audio API → Expo AV (preparado)
+- CSS → StyleSheet de React Native
+
+---
+
+Hecho con ❤️ y React Native
